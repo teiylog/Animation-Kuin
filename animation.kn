@@ -1,0 +1,65 @@
+var wndMain: wnd@Wnd
+var drawMain: wnd@Draw
+var sizeCount: int :: 1
+var countMessage: int :: 3
+var messageFlag: bool :: false
+
+func main()
+	
+	do @wndMain :: wnd@makeWnd(null, %aspect, 600, 600, "animate")
+	do @drawMain :: wnd@makeDraw(@wndMain, 0, 0, 600, 600, %scale, %scale, false)
+	
+	while(wnd@act())
+		
+		do draw@clearColor(0xFFFFFFFF)
+		do @drawCenterBox(550.0, 550.0, 0xFFCC6666)
+		do @drawCountText(@getSizeCount(100, 10), 0xFFFFFFFF, @getCountMessage())
+		
+		do draw@render(60)
+		
+	end while
+	
+end func
+
+func getCountMessage(): []char
+	if(@countMessage < 0)
+		ret "Go!"
+	end if
+	ret @countMessage.toStr()
+end func
+
+func getGoMessageFlag(): bool
+	if(@getCountMessage() = "Go!")
+		do @messageFlag :: true
+	end if
+	ret @messageFlag
+end func
+
+func getSizeCount(maxSize: int, addAmount: int): int
+	if(@getGoMessageFlag())
+		ret maxSize
+	end if
+	if(@sizeCount <= maxSize)
+		do @sizeCount :+ addAmount
+	else
+		do lib@sleep(500)
+		do @sizeCount :: 1
+		if(@countMessage >= -1)
+			do @countMessage :- 1
+		end if
+	end if
+	ret @sizeCount
+end func
+
+func drawCenterBox(sizeX: float, sizeY: float, color: int)
+	var spaceX: float :: (600.0 - sizeX) / 2.0
+	var spaceY: float :: (600.0 - sizeY) / 2.0
+	do draw@rect(spaceX, spaceY, sizeX, sizeY, color)
+end func
+
+func drawCountText(size: int, color: int, text: []char)
+	var font: draw@Font :: draw@makeFont(null, size, false, false, true, 0.0)
+	var width: float :: font.calcWidth(text)
+	var height: float :: 300.0 - size $ float
+	do font.draw(300.0 - width / 2.0, height, text, 0xFFFFFFFF)
+end func
